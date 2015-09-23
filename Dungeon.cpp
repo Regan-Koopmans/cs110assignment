@@ -1,11 +1,14 @@
 #include <iostream>
 #include <stdlib.h>
+#include <string>
 #include <fstream>
 #include "Dungeon.h"
 
+using namespace std;
+
 Dungeon::Dungeon()
 {
-  
+
 }
 
 Dungeon::Dungeon(unsigned int rows, unsigned int col)
@@ -16,29 +19,39 @@ Dungeon::Dungeon(unsigned int rows, unsigned int col)
 
 Dungeon::Dungeon(string fileName)
 {
+  worldRows = -1;
+  worldColumns = -1;
   readInMaze(fileName);
 }
 
 Dungeon::~Dungeon()
 {
-  for (int x = 0; x < worldRows; x++)
+  for (unsigned int x = 0; x < worldRows; x++)
   {
-    delete [] map[x];
+    delete [] maze[x];
   }
-  delete [] map;
+  delete [] maze;
 }
 
-char Dungeon::getMazeSquare(unsigned int row, unsigned int col)
+char Dungeon::getMazeSquare(unsigned int row, unsigned int col) const
 {
-  if (row > worldRows || col > worldColumns)
+  try
   {
-    cout << "Invalid cell in dungeon. Exiting the game." << endl;
-    exit(0);
+    if (row > worldRows || col > worldColumns)
+    {
+      throw string("Invalid cell in dungeon. Exiting the game.");
+    }
   }
+  catch (string error)
+  {
+      cout << error << endl;
+      exit(0);
+  }
+
   return maze[row][col];
 }
 
-unsigned int Dungeon::getWorldRows()
+unsigned int Dungeon::getWorldRows() const
 {
   return worldRows;
 }
@@ -48,7 +61,7 @@ void Dungeon::setWorldRows(unsigned int r)
   worldRows = r;
 }
 
-unsigned int Dungeon::getWorldColumns()
+unsigned int Dungeon::getWorldColumns() const
 {
   return worldColumns;
 }
@@ -60,10 +73,44 @@ void Dungeon::setWorldColumns(unsigned int c)
 
 void Dungeon::readInMaze(string fileName)
 {
-  ifstream inputFile(fileName);
-  if (!inputFile.good())
+  ifstream inputFile(fileName.c_str());
+  try
   {
-    cout << "The file does not exist. Exiting the program." << endl;
-    exit(0);
+    if (!inputFile.good())
+    {
+      throw "The file does not exist. Exiting the program.";
+
+    }
   }
+    catch (string error)
+    {
+      cout << error << endl;
+      exit(0);
+    }
+
+  int y = 0;
+  int x = 0;
+  char oneTile;
+
+  while(!inputFile.eof())
+  {
+    inputFile >> oneTile;
+
+    if (oneTile == '\n')
+    {
+      x = 0;
+      y++;
+      inputFile >> oneTile;
+      maze[x][y] = oneTile;
+    }
+    else
+    {
+      x++;
+      maze[x][y] = oneTile;
+    }
+  }
+
+  worldRows = x;
+  worldRows = y;
+
 }

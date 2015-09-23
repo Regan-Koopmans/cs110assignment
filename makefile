@@ -2,8 +2,7 @@ CC = g++
 CFLAGS = -Wall -Werror
 LFLAGS = -static
 TARGET = main
-OBJECTS =
-
+OBJECTS = RandomNumberGenerator.o Dungeon.o Creature.o RolePlayingGame.o
 
 
 all: $(OBJECTS)
