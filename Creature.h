@@ -9,11 +9,11 @@ public:
     bool isDead();
     void setHealth(unsigned int h);
     unsigned int getHealth();
+    
 private:
     unsigned int attack;
     unsigned int defense;
     unsigned int health;
 };
 
-#endif	//CREATURE_H 
-
+#endif	//CREATURE_H
