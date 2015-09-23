@@ -26,20 +26,28 @@ bool RolePlayingGame::moveHero(const char direction)
   {
     case 'w':;
     break;
+
     case 's':;
     break;
+
     case 'a':;
     break;
+
     case 'd':;
     break;
+
     case 'W':;
     break;
+
     case 'S':;
     break;
+
     case 'A':;
     break;
+
     case 'D':;
     break;
+
   };
 }
 
@@ -103,6 +111,16 @@ void RolePlayingGame::setNrPotions(unsigned int p)
 
 void RolePlayingGame::initializeCreatures()
 {
+  creatures = new Creature * [dungeon.worldRows];
+
+  for (unsigned int x = 0; x < worldRows; x++)
+  {
+    creatures[x] = new Creature[dungeon.worldColumns];
+    for (unsigned y = 0; y < worldColumns; y++)
+    {
+      creatures[x][y] = 0;
+    }
+  }
 
 }
 
@@ -121,7 +139,7 @@ void RolePlayingGame::initializeMonsters(unsigned int seed, unsigned int numMon)
       cout << "Enter an integer from 0 to 9. How many monsters should be added: ";
       cin >> numMon;
     }
-  } while (numMon);
+  } while (numMon < 0 || numMon > 10);
 
   do
   {
@@ -134,12 +152,40 @@ void RolePlayingGame::initializeMonsters(unsigned int seed, unsigned int numMon)
 
 void RolePlayingGame::initializeFirstAidKits(unsigned int seed, unsigned int numKits, unsigned int boost)
 {
-
+  do
+  {
+    if (numKits > 10)
+    {
+      cout << "Too many first aid kits requested. Maximum 9 allowed" << endl;
+      cout << "Enter an integer from 0 to 9. How many potions should be added: ";
+      cin >> numKits;
+    }
+    if (numKits < 0)
+    {
+      cout << "Enter an integer from 0 to ";
+      cout << x << ". How many potions should be added: ";
+      cin >> numKits;
+    }
+  } while (numKits < 0 || numKits > 10));
 }
 
 void RolePlayingGame::initializePotions(unsigned int seed, unsigned int numPotions)
 {
-
+  do
+  {
+    if (numPotions > 10)
+    {
+      cout << "Too many potions requested. Maximum 9 allowed" << endl;
+      cout << "Enter an integer from 0 to 9. How many potions should be added: ";
+      cin >> numPotions;
+    }
+    if (numPotions < 0)
+    {
+      cout << "Enter an integer from 0 to ";
+      cout << x << ". How many potions should be added: ";
+      cin >> numPotions;
+    }
+  } while (numMon);
 }
 
 void RolePlayingGame::initializeHero(unsigned int seed)
