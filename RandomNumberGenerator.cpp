@@ -1,4 +1,8 @@
+#include <iostream>
+
 #include "RandomNumberGenerator.h"
+
+using namespace std;
 
 RandomNumberGenerator::RandomNumberGenerator(int seed, int max, int m, int i)
 {
@@ -10,8 +14,10 @@ RandomNumberGenerator::RandomNumberGenerator(int seed, int max, int m, int i)
 
 int RandomNumberGenerator::nextInt()
 {
+
 	int tmp = nextNumber;
-	nextNumber = (multiplier*tmp + increment)%maximum;
+	nextNumber = (multiplier * tmp + increment) % maximum;
+	cout << "Maximum is: " << maximum << endl;
 	return tmp;
 }
 

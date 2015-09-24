@@ -1,10 +1,8 @@
 #ifndef ROLEPLAYINGGAME_H
 #define	ROLEPLAYINGGAME_H
 
-#include "RandomNumberGenerator.h"
 #include "Creature.h"
 #include "Dungeon.h"
-#include <vector>
 
 class RolePlayingGame
 {
@@ -42,6 +40,7 @@ private:
     Creature*** creatures;
     unsigned int nrMonsters;
     unsigned int nrFirstAidKits;
+    unsigned int nrPotions;
     unsigned int healthBoost;
     unsigned int maxHealth;
 };

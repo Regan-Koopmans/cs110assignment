@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <algorithm>
 #include <fstream>
 #include "Dungeon.h"
 
@@ -15,12 +16,21 @@ Dungeon::Dungeon(unsigned int rows, unsigned int col)
 {
   worldRows = rows;
   worldColumns = col;
+  maze = new char * [worldRows];
+  for (unsigned int x = 0; x < worldRows; x++)
+  {
+    maze[x] = new char[worldColumns];
+    for (unsigned int y = 0; y < worldColumns; y++)
+    {
+      maze[x][y] = ' ';
+    }
+  }
 }
 
 Dungeon::Dungeon(string fileName)
 {
-  worldRows = -1;
-  worldColumns = -1;
+  worldRows = 0;
+  worldColumns = 0;
   readInMaze(fileName);
 }
 
@@ -37,7 +47,7 @@ char Dungeon::getMazeSquare(unsigned int row, unsigned int col) const
 {
   try
   {
-    if (row > worldRows || col > worldColumns)
+    if (row >= worldRows || col >= worldColumns)
     {
       throw string("Invalid cell in dungeon. Exiting the game.");
     }
@@ -73,7 +83,8 @@ void Dungeon::setWorldColumns(unsigned int c)
 
 void Dungeon::readInMaze(string fileName)
 {
-  ifstream inputFile(fileName.c_str());
+  ifstream inputFile;
+  inputFile.open(fileName.c_str());
   try
   {
     if (!inputFile.good())
@@ -88,29 +99,33 @@ void Dungeon::readInMaze(string fileName)
       exit(0);
     }
 
-  int y = 0;
-  int x = 0;
-  char oneTile;
+  //Determine rows and columns
 
-  while(!inputFile.eof())
+  inputFile >> worldRows;
+
+  inputFile >> worldColumns;
+
+
+  //allocate the maze.
+
+  maze = new char * [worldRows];
+  for (unsigned int x = 0; x < worldRows; x++)
   {
-    inputFile >> oneTile;
-
-    if (oneTile == '\n')
+    maze[x] = new char[worldColumns];
+    for (unsigned int y = 0; y < worldColumns; y++)
     {
-      x = 0;
-      y++;
-      inputFile >> oneTile;
-      maze[x][y] = oneTile;
-    }
-    else
-    {
-      x++;
-      maze[x][y] = oneTile;
+      maze[x][y] = ' ';
     }
   }
 
-  worldRows = x;
-  worldRows = y;
+
+  for (unsigned int x = 0; x < worldRows; x++)
+  {
+    for (unsigned int y = 0; y < worldColumns; y++)
+    {
+      inputFile.get(maze[x][y]);
+    //  cout << maze[x][y];
+    }
+  }
 
 }

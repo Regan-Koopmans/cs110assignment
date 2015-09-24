@@ -1,13 +1,12 @@
 CC = g++
-CFLAGS = -Wall -Werror
+CFLAGS = -Wall -Werror -g
 LFLAGS = -static
 TARGET = main
-OBJECTS = RandomNumberGenerator.o Dungeon.o Creature.o RolePlayingGame.o
+OBJECTS = RandomNumberGenerator.o Dungeon.o Creature.o RolePlayingGame.o main.o
 
 
 all: $(OBJECTS)
 	$(CC) $(LFLAGS) $(OBJECTS) -o $(TARGET)
-
 
 
 %.o: %.cpp
