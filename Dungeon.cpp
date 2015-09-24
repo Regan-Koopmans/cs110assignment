@@ -78,7 +78,7 @@ void Dungeon::readInMaze(string fileName)
   {
     if (!inputFile.good())
     {
-      throw "The file does not exist. Exiting the program.";
+      throw string("The file does not exist. Exiting the program.");
 
     }
   }
