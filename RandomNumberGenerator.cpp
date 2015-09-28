@@ -17,7 +17,6 @@ int RandomNumberGenerator::nextInt()
 
 	int tmp = nextNumber;
 	nextNumber = (multiplier * tmp + increment) % maximum;
-	cout << "Maximum is: " << maximum << endl;
 	return tmp;
 }
 

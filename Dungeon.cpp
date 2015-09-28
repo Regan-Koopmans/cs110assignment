@@ -9,7 +9,7 @@ using namespace std;
 
 Dungeon::Dungeon()
 {
-
+  worldRows = 0;
 }
 
 Dungeon::Dungeon(unsigned int rows, unsigned int col)
@@ -118,14 +118,22 @@ void Dungeon::readInMaze(string fileName)
     }
   }
 
+  //inputFile.close();
+  //inputFile.open(fileName.c_str());
+  //char inputChar = ' ';
+
+  cout << worldRows << worldColumns << endl;
 
   for (unsigned int x = 0; x < worldRows; x++)
   {
     for (unsigned int y = 0; y < worldColumns; y++)
     {
       inputFile.get(maze[x][y]);
-    //  cout << maze[x][y];
+      if (maze[x][y] == '\n')
+        inputFile.get(maze[x][y]);
+      cout << maze[x][y];
     }
+    cout << endl;
   }
 
 }

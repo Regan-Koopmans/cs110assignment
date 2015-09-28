@@ -6,10 +6,15 @@
 #include "RandomNumberGenerator.h"
 #include "Dungeon.h"
 #include "RolePlayingGame.h"
+#include "Hero.h"
 
 using namespace std;
 
-RolePlayingGame::RolePlayingGame(unsigned int seed, unsigned int nrMon, unsigned int nrKits, unsigned int nrPotions, unsigned int boost, unsigned int maxHealth)
+int confusion = 1;
+
+RolePlayingGame::RolePlayingGame(unsigned int seed, unsigned int nrMon,
+  unsigned int nrKits, unsigned int nrPotions, unsigned int boost,
+  unsigned int maxHealth)
 {
     //initialize the dungeon to be empty
     this->dungeon.readInMaze("mazeExample.txt");
@@ -20,6 +25,8 @@ RolePlayingGame::RolePlayingGame(unsigned int seed, unsigned int nrMon, unsigned
 
     initializeMonsters(seed, nrMon);
 
+    initializePotions(seed, nrPotions);
+
     initializeFirstAidKits(seed, nrKits, boost);
 
     this->maxHealth = maxHealth;
@@ -27,78 +34,182 @@ RolePlayingGame::RolePlayingGame(unsigned int seed, unsigned int nrMon, unsigned
 
 RolePlayingGame::~RolePlayingGame()
 {
-
+//  delete [] monsters;
+  delete monsters;
+//  monsters = 0;
 }
 
 bool RolePlayingGame::moveHero(const char direction)
 {
-  vector<int> heroLocation = locateCreature(&hero);
-  int newX = heroLocation[0];
-  int newY = heroLocation[1];
+
+  RandomNumberGenerator ran(1, this->dungeon.getWorldRows());
+  RandomNumberGenerator ran2(1, this->dungeon.getWorldColumns());
+
+  unsigned int row,col;
+
+  unsigned int newX = locateCreature(&hero).at(0);
+  unsigned int oldX = locateCreature(&hero).at(0);
+  unsigned int newY = locateCreature(&hero).at(1);
+  unsigned int oldY = locateCreature(&hero).at(1);
 
   switch(direction)
   {
-    case 'w': newX++;
+    case 'w':
+            if (newX > 0)
+              newX -= confusion;
 
     break;
 
-    case 's':;
+    case 's':
+      if ( newY < dungeon.getWorldColumns() -1)
+        newY += confusion;
+
     break;
 
-    case 'a':;
+    case 'a':
+    if ( newY > 0)
+      newY -= confusion;
     break;
 
-    case 'd':;
+    case 'z':
+    if ( newX < dungeon.getWorldRows() -1)
+      newX += confusion;
     break;
 
-    case 'W':;
+    case 'W':
+        if ( newX > 0)
+          newX -= confusion;
     break;
 
-    case 'S':;
+    case 'Z':
+      if ( newX < dungeon.getWorldRows() -1)
+        newX += confusion;
     break;
 
-    case 'A':;
+    case 'A':
+    if ( newY > 0)
+      newY -= confusion;
     break;
 
-    case 'D':;
+    case 'S':
+      if ( newY < dungeon.getWorldColumns() -1)
+        newY += confusion;
     break;
+
   };
 
-  if (dungeon.getMazeSquare(newX,newY) == ' ')
-  {
+  // if trying to an empty space.
 
+  if (dungeon.getMazeSquare(newX,newY) == ' ' &&
+  creatures[newX][newY] != creatures[oldX][oldY] && creatures[newX][newY] == 0)
+  {
+    creatures[newX][newY] = creatures[oldX][oldY];
+    creatures[oldX][oldY] = 0;
     return true;
   }
   else
   {
-    if (dungeon.getMazeSquare(newX,newY) == 'P')
+    if (creatures[newX][newY] == 0)
     {
       cout << endl;
-      cout << "Oh dear, I am dizzy, the world is spinning..." << endl;
+      switch(dungeon.getMazeSquare(newX,newY))
+      {
 
-    } else if (dungeon.getMazeSquare(newX,newY) == 'R')
-    {
-      cout << endl;
-      cout << "I suddently have some perspective!" << endl;
+        case '*': cout << "Ouch! I cannot walk over obstacles!" << endl;
+                  break;
+
+        case 'T': cout << "Ouch! I cannot walk over traps! I am hurt!" << endl;
+                  creatures[newX][newY] = creatures[oldX][oldY];
+                  creatures[oldX][oldY] = 0;
+                hero.setHealth(hero.getHealth() - 1);
+                break;
+      };
+      return true;
     }
-    else if (dungeon.getMazeSquare(newX,newY) == '*')
+    else if (newX == oldX && newY == oldY)
     {
-      cout << endl;
-      cout << "Ouch! I cannot walk over obstacles!" << endl;
+      return true;
     }
-    else if (dungeon.getMazeSquare(newX,newY) == 'T')
+    else //is a "creature"
     {
-      cout << endl;
-      cout << "Ouch! I cannot walk over traps! I am hurt!" << endl;
-      hero.setHealth(hero.getHealth() - 1);
-    }
-    else
-    {
+     bool monster = false;
+     bool potion = false;
+     bool firstAidKit = false;
+
+     for (unsigned int x = 0; x < nrMonsters; x++)
+      {
+       if (creatures[newX][newY] == &monsters[x])
+       {
+         monster = true;
+       }
+
+       if (x < nrPotions)
+        if (creatures[newX][newY] == &potions[x])
+          potion = true;
+
+      if (x < nrFirstAidKits)
+        if (creatures[newX][newY] == &firstAidKits[x])
+          firstAidKit = true;
+
+       if (monster || potion || firstAidKit)
+        break;
+     }
+
+     if (monster)
+     {
+       hero.attackEnemy(*creatures[newX][newY]);
+       return true;
+     }
+     else if (potion)
+     {
+       if (creatures[newX][newY]->getHealth() != 0)
+       {
+         cout << "Oh dear, I am dizzy, the world is spinning..." << endl;
+         confusion = -1;
+       }
+       else
+       {
+          cout << "I suddenly have some perspective!" << endl;
+          confusion = 1;
+       }
+       do
+       {
+
+         row = ran.nextInt();
+         col = ran2.nextInt();
+
+       } while (creatures[row][col] != 0 || dungeon.getMazeSquare(row,col) != ' ');
+
+
+       creatures[row][col] = creatures[newX][newY];
+
+       creatures[newX][newY] = creatures[oldX][oldY];
+       creatures[oldX][oldY] = 0;
+     }
+     else
+     {
+       if (hero.getHealth() + creatures[newX][newY]->getHealth() <= (maxHealth))
+       {
+         hero.setHealth(hero.getHealth() + creatures[newX][newY]->getHealth());
+         cout << "Health increased! New health = ";
+         cout << hero.getHealth() << endl;
+       }
+       else
+       {
+         cout << "Wasted kit! Health cannot be increased with boost." << endl;
+         cout << "Went over maximum health. Current health = ";
+         cout << hero.getHealth() << endl;
+       }
+
+       creatures[newX][newY] = creatures[oldX][oldY];
+       creatures[oldX][oldY] = 0;
+
+
+     }
 
     }
-    return false;
   }
-
+  return false;
 }
 
 void RolePlayingGame::printBoard()
@@ -108,17 +219,63 @@ for (unsigned int x = 0; x < dungeon.getWorldRows(); x++)
 {
   for (unsigned int y = 0; y < dungeon.getWorldColumns(); y++)
   {
-    if ((dungeon.getMazeSquare(x,y) == ' ' || dungeon.getMazeSquare(x,y) == '*') && creatures[x][y] != 0)
+    if (creatures[x][y] != 0)
     {
-      cout << dungeon.getMazeSquare(x,y);
+      if (creatures[x][y] == &hero)
+      {
+        cout << "H";
+      }
+      else
+      {
+
+        bool firstAidKit = false;
+        bool potion = false;
+
+        for (unsigned int i = 0; i < nrFirstAidKits; i++)
+        {
+          if (creatures[x][y] == &firstAidKits[i])
+          {
+            firstAidKit = true;
+          }
+
+        }
+
+        for (unsigned int i = 0; i < nrPotions; i++)
+        {
+          if (creatures[x][y] == &potions[i])
+          {
+            potion = true;
+          }
+        }
+
+        if (firstAidKit)
+        {
+          cout << "+";
+        }
+        else if (potion)
+        {
+          if (creatures[x][y]->getHealth())
+            cout << "P";
+          else
+            cout << "R";
+        }
+        else
+        {
+        if (!monsters[x].isDead())
+        {
+          cout << monsterCount;
+        }
+        ++monsterCount;
+        }
+      }
+
     }
     else
     {
-      cout << "@";
+      cout << dungeon.getMazeSquare(x,y);
     }
   }
-  cout << monsterCount;
-  monsterCount++;
+  cout << endl;
 }
 }
 
@@ -129,12 +286,20 @@ bool RolePlayingGame::heroIsDead()
 
 bool RolePlayingGame::allMonstersDead()
 {
-  return (nrMonsters > 0);
+  return (nrMonsters == 0);
 }
 
 void RolePlayingGame::removeDeadMonsters()
 {
-
+  for (unsigned int x = 0; x < nrMonsters; x++)
+  {
+    if (monsters[x].isDead())
+    {
+      vector<int> location = locateCreature(&monsters[x]);
+      creatures[location.at(0)][location.at(1)] = 0;
+      --nrMonsters;
+    }
+  }
 }
 
 unsigned int RolePlayingGame::getNrMonsters() const
@@ -201,89 +366,140 @@ void RolePlayingGame::initializeMonsters(unsigned int seed, unsigned int numMon)
     }
   } while (numMon < 0 || numMon > 9);
 
-  monsters = new Creature[numMon];
+  nrMonsters = numMon;
+  monsters = new Creature[nrMonsters];
 
   //Placing the monsters
+  srand(time(NULL));
+  RandomNumberGenerator ran(seed, this->dungeon.getWorldRows());
+  RandomNumberGenerator ran2(seed, this->dungeon.getWorldColumns());
 
-  for (unsigned int everyMonster = 0; everyMonster < numMon; everyMonster++)
+  for (unsigned int everyMonster = 0; everyMonster < nrMonsters; everyMonster++)
   {
-    srand(time(NULL));
+
     do
     {
-      RandomNumberGenerator ran(seed, this->dungeon.getWorldRows());
-      row = rand() % dungeon.getWorldRows();
-      RandomNumberGenerator ran2(seed, this->dungeon.getWorldColumns());
-      col = rand() % dungeon.getWorldColumns();
 
-    } while ((row >= dungeon.getWorldRows() || col >= dungeon.getWorldColumns()) || (dungeon.getMazeSquare(row,col) != ' '));
+      row = ran.nextInt();
+
+      col = ran2.nextInt();
+
+    } while ((row >= dungeon.getWorldRows() || col >= dungeon.getWorldColumns())
+     || (dungeon.getMazeSquare(row,col) != ' '));
 
     monsters[everyMonster] = Creature();
     creatures[row][col] = &monsters[everyMonster];
   }
 }
 
-void RolePlayingGame::initializeFirstAidKits(unsigned int seed, unsigned int numKits, unsigned int boost)
+void RolePlayingGame::initializeFirstAidKits(unsigned int seed,
+  unsigned int numKits, unsigned int boost)
 {
   unsigned int x = nrMonsters/2;
+  unsigned row,col;
   do
   {
-    if (numKits >= x)
+    if (numKits > x)
     {
       cout << "Too many first aid kits requested.";
       cout << " Maximum " << x << " allowed" << endl;
       cout << "Enter an integer from 0 to ";
-      cout << x << ". How many potions should be added: ";
+      cout << x << ". How many kits should be added: ";
       cin >> numKits;
     }
     if (numKits < 0)
     {
       cout << "Enter an integer from 0 to ";
-      cout << x << ". How many potions should be added: ";
+      cout << x << ". How many kits should be added: ";
       cin >> numKits;
     }
   } while (numKits < 0 || numKits >= x);
+  nrFirstAidKits =  numKits;
 
-  firstAidKits = new Creature[numKits];
+  RandomNumberGenerator ran(seed, this->dungeon.getWorldRows());
+  RandomNumberGenerator ran2(seed, this->dungeon.getWorldColumns());
+
+  firstAidKits = new Creature[nrFirstAidKits];
+
+  for (unsigned int x = 0; x < nrFirstAidKits; x++)
+  {
+    do
+    {
+      row = ran.nextInt();
+      col = ran.nextInt();
+
+    } while ((row >= dungeon.getWorldRows() || col >= dungeon.getWorldColumns())
+    || (dungeon.getMazeSquare(row,col) != ' '));
+    firstAidKits[x] = Creature();
+    firstAidKits[x].setHealth(boost);
+    creatures[row][col] = &firstAidKits[x];
+  }
 }
+
 
 void RolePlayingGame::initializePotions(unsigned int seed, unsigned int numPotions)
 {
-  unsigned int x = nrMonsters/2;
+  srand(time(NULL));
 
+  unsigned int x = nrMonsters/2;
+  unsigned row,col;
   do
   {
-    if (numPotions >= x)
+    if (numPotions > x)
     {
-      cout << "Too many potions requested. Maximum 9 allowed" << endl;
-      cout << "Enter an integer from " << x;
-      cout << " to 9. How many potions should be added: ";
+      cout << "Too many potions requested.";
+      cout << " Maximum " << x << " allowed" << endl;
+      cout << "Enter an integer from 0 to ";
+      cout << x << ". How many potions should be added: ";
       cin >> numPotions;
     }
     if (numPotions < 0)
     {
-      cout << "Enter an integer from " << x;
-      cout << " to 9. How many potions should be added: ";
+      cout << "Enter an integer from 0 to ";
+      cout << x << ". How many potions should be added: ";
       cin >> numPotions;
     }
   } while (numPotions < 0 || numPotions >= x);
+  nrPotions =  numPotions;
 
-  potions = new Creature[numPotions];
+  potions = new Creature[nrPotions];
+
+  RandomNumberGenerator ran(seed, this->dungeon.getWorldRows());
+  RandomNumberGenerator ran2(seed, this->dungeon.getWorldColumns());
+
+  for (unsigned int x = 0; x < nrPotions; x++)
+  {
+    do
+    {
+      row = ran.nextInt();
+      col = ran2.nextInt();
+
+    } while ((row >= dungeon.getWorldRows() || col >= dungeon.getWorldColumns())
+    || (dungeon.getMazeSquare(row,col) != ' '));
+    potions[x] = Creature();
+    if (x % 2)
+    {
+      potions[x].setHealth(0);
+    }
+    creatures[row][col] = &potions[x];
+  }
+
 }
 
 void RolePlayingGame::initializeHero(unsigned int seed)
 {
   hero = Creature();
   unsigned int row,col;
+  RandomNumberGenerator ran(seed, this->dungeon.getWorldRows() -2);
+  RandomNumberGenerator ran2(seed, this->dungeon.getWorldColumns() -2);
   do
   {
-    RandomNumberGenerator ran(seed, this->dungeon.getWorldRows() -2);
-    row = rand() % dungeon.getWorldRows();
-    RandomNumberGenerator ran2(seed, this->dungeon.getWorldColumns() -2);
-    col = rand() % dungeon.getWorldColumns();
-
-  } while ((row >= dungeon.getWorldRows() || col >= dungeon.getWorldColumns()) || (dungeon.getMazeSquare(row,col) != ' '));
-
-  //dungeon.getMazeSquare(row,col) = 'H';
+    //row = rand() % dungeon.getWorldRows();
+    row = ran.nextInt();
+    //col = rand() % dungeon.getWorldColumns();
+    col = ran2.nextInt();
+  } while ((row >= dungeon.getWorldRows() || col >= dungeon.getWorldColumns())
+  || (dungeon.getMazeSquare(row,col) != ' '));
   creatures[row][col] = &hero;
 }
 
@@ -294,7 +510,6 @@ vector<int> RolePlayingGame::locateCreature(Creature* creature)
     for (unsigned int y = 0; y < dungeon.getWorldColumns(); y++)
       if (creatures[x][y] == creature)
       {
-        vector<int> result;
         result.push_back(x);
         result.push_back(y);
       }

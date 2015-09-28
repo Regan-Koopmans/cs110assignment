@@ -20,10 +20,10 @@ void Creature::attackEnemy(Creature& defender)
     //generate numbers between 1 and 100
     unsigned int attack1 = (rand()%100)+1;
     unsigned int defense1 = (rand()%100)+1;
-    
+
     unsigned int attack2 = (rand()%100)+1;
     unsigned int defense2 = (rand()%100)+1;
-    
+
     //did the attacker (hero) hit the enemy?
     if ((attack > attack1) && (defense1 > defender.defense))
     {
@@ -34,7 +34,7 @@ void Creature::attackEnemy(Creature& defender)
     {
         cout << "Monster missed!" << endl;
     }
-    
+
     //did the monster hit the hero?
     if ((defender.attack > attack2) && (defense2 > defense))
     {
@@ -45,14 +45,14 @@ void Creature::attackEnemy(Creature& defender)
     {
         cout << "Hero missed!" << endl;
     }
-    
+
     cout << "Hero health: " << health << endl;
     cout << "Monster health: " << defender.health << endl;
 }
-    
-bool Creature::isDead() 
+
+bool Creature::isDead()
 {
-    return (health == 0);
+    return (health <= 0);
 }
 
 void Creature::setHealth(unsigned int h)

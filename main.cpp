@@ -7,9 +7,9 @@ using namespace std;
 
 int main() {
 
-    //RandomNumberGenerator rndGen = RandomNumberGenerator(15,20);
 
-    RolePlayingGame game((unsigned int)20, (unsigned int)10, (unsigned int)5, (unsigned int)8, (unsigned int)30, (unsigned int)30);  //change values here to test
+
+    RolePlayingGame game((unsigned int)10, (unsigned int)10, (unsigned int)5, (unsigned int)8, (unsigned int)30, (unsigned int)60);  //change values here to test
     bool gameOver = false;
 
     do
