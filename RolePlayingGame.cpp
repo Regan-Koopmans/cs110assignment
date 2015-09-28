@@ -17,7 +17,7 @@ RolePlayingGame::RolePlayingGame(unsigned int seed, unsigned int nrMon,
   unsigned int maxHealth)
 {
     //initialize the dungeon to be empty
-    this->dungeon.readInMaze("mazeExample.txt");
+    this->dungeon.readInMaze("test2.txt");
 
     initializeCreatures();
 
@@ -214,7 +214,7 @@ bool RolePlayingGame::moveHero(const char direction)
 
 void RolePlayingGame::printBoard()
 {
-int monsterCount = 0;
+//int monsterCount = 0;
 for (unsigned int x = 0; x < dungeon.getWorldRows(); x++)
 {
   for (unsigned int y = 0; y < dungeon.getWorldColumns(); y++)
@@ -261,11 +261,15 @@ for (unsigned int x = 0; x < dungeon.getWorldRows(); x++)
         }
         else
         {
-        if (!monsters[x].isDead())
-        {
-          cout << monsterCount;
-        }
-        ++monsterCount;
+          for (unsigned int i = 0; i < nrMonsters; i++)
+          {
+            if (creatures[x][y] == &monsters[i])
+            {
+              cout << i;
+            }
+          }
+        //  cout << monsterCount;
+        //++monsterCount;
         }
       }
 
@@ -297,7 +301,7 @@ void RolePlayingGame::removeDeadMonsters()
     {
       vector<int> location = locateCreature(&monsters[x]);
       creatures[location.at(0)][location.at(1)] = 0;
-      --nrMonsters;
+      //--nrMonsters;
     }
   }
 }
@@ -367,6 +371,7 @@ void RolePlayingGame::initializeMonsters(unsigned int seed, unsigned int numMon)
   } while (numMon < 0 || numMon > 9);
 
   nrMonsters = numMon;
+  cout << "Monsters to be entered " << nrMonsters << endl;
   monsters = new Creature[nrMonsters];
 
   //Placing the monsters
@@ -388,6 +393,7 @@ void RolePlayingGame::initializeMonsters(unsigned int seed, unsigned int numMon)
      || (dungeon.getMazeSquare(row,col) != ' '));
 
     monsters[everyMonster] = Creature();
+    cout << row << " " << col << endl;
     creatures[row][col] = &monsters[everyMonster];
   }
 }
@@ -413,7 +419,7 @@ void RolePlayingGame::initializeFirstAidKits(unsigned int seed,
       cout << x << ". How many kits should be added: ";
       cin >> numKits;
     }
-  } while (numKits < 0 || numKits >= x);
+  } while (numKits < 0 || numKits > x);
   nrFirstAidKits =  numKits;
 
   RandomNumberGenerator ran(seed, this->dungeon.getWorldRows());
@@ -459,7 +465,9 @@ void RolePlayingGame::initializePotions(unsigned int seed, unsigned int numPotio
       cout << x << ". How many potions should be added: ";
       cin >> numPotions;
     }
-  } while (numPotions < 0 || numPotions >= x);
+  } while (numPotions < 0 || numPotions > x);
+
+
   nrPotions =  numPotions;
 
   potions = new Creature[nrPotions];
