@@ -17,17 +17,27 @@ RolePlayingGame::RolePlayingGame(unsigned int seed, unsigned int nrMon,
   unsigned int maxHealth)
 {
     //initialize the dungeon to be empty
-    this->dungeon.readInMaze("test2.txt");
+
+    this->dungeon.readInMaze("mazeExample.txt");
 
     initializeCreatures();
 
+
     initializeHero(seed);
+
+
 
     initializeMonsters(seed, nrMon);
 
+
+
     initializePotions(seed, nrPotions);
 
+
+
     initializeFirstAidKits(seed, nrKits, boost);
+
+
 
     this->maxHealth = maxHealth;
 }
@@ -299,8 +309,10 @@ void RolePlayingGame::removeDeadMonsters()
   {
     if (monsters[x].isDead())
     {
+
       vector<int> location = locateCreature(&monsters[x]);
-      creatures[location.at(0)][location.at(1)] = 0;
+      if (location.size() == 2)
+        creatures[location.at(0)][location.at(1)] = 0;
       //--nrMonsters;
     }
   }
@@ -393,7 +405,6 @@ void RolePlayingGame::initializeMonsters(unsigned int seed, unsigned int numMon)
      || (dungeon.getMazeSquare(row,col) != ' '));
 
     monsters[everyMonster] = Creature();
-    cout << row << " " << col << endl;
     creatures[row][col] = &monsters[everyMonster];
   }
 }
@@ -496,18 +507,21 @@ void RolePlayingGame::initializePotions(unsigned int seed, unsigned int numPotio
 
 void RolePlayingGame::initializeHero(unsigned int seed)
 {
+  cout << seed << endl;
+
   hero = Creature();
   unsigned int row,col;
   RandomNumberGenerator ran(seed, this->dungeon.getWorldRows() -2);
   RandomNumberGenerator ran2(seed, this->dungeon.getWorldColumns() -2);
+
   do
   {
-    //row = rand() % dungeon.getWorldRows();
     row = ran.nextInt();
-    //col = rand() % dungeon.getWorldColumns();
     col = ran2.nextInt();
+
   } while ((row >= dungeon.getWorldRows() || col >= dungeon.getWorldColumns())
   || (dungeon.getMazeSquare(row,col) != ' '));
+
   creatures[row][col] = &hero;
 }
 

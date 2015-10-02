@@ -60,7 +60,7 @@ void Creature::setHealth(unsigned int h)
     health = h;
 }
 
-unsigned int Creature::getHealth()
+unsigned int Creature::getHealth() const
 {
     return health;
 }

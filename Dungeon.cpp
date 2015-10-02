@@ -10,6 +10,8 @@ using namespace std;
 Dungeon::Dungeon()
 {
   worldRows = 0;
+  worldColumns = 0;
+  maze = 0;
 }
 
 Dungeon::Dungeon(unsigned int rows, unsigned int col)
@@ -31,6 +33,7 @@ Dungeon::Dungeon(string fileName)
 {
   worldRows = 0;
   worldColumns = 0;
+  maze = 0;
   readInMaze(fileName);
 }
 
@@ -49,12 +52,13 @@ char Dungeon::getMazeSquare(unsigned int row, unsigned int col) const
   {
     if (row >= worldRows || col >= worldColumns)
     {
+      cout << endl;
       throw string("Invalid cell in dungeon. Exiting the game.");
     }
   }
   catch (string error)
   {
-      cout << error << endl;
+      cout << error;
       exit(0);
   }
 
@@ -83,28 +87,56 @@ void Dungeon::setWorldColumns(unsigned int c)
 
 void Dungeon::readInMaze(string fileName)
 {
+
   ifstream inputFile;
   inputFile.open(fileName.c_str());
   try
   {
     if (!inputFile.good())
     {
+      cout << endl;
       throw string("The file does not exist. Exiting the program.");
 
     }
   }
     catch (string error)
     {
-      cout << error << endl;
+      cout << error;
       exit(0);
     }
 
   //Determine rows and columns
 
-  inputFile >> worldRows;
+  unsigned int rowRead,columnRead;
 
-  inputFile >> worldColumns;
+  inputFile >> rowRead;
 
+  inputFile >> columnRead;
+
+  if (maze || ( worldRows != rowRead || worldColumns != columnRead ))
+  {
+    for (unsigned int x = 0; x < worldRows; x++)
+    {
+      delete maze[x];
+    }
+    delete [] maze;
+
+
+
+    worldRows = rowRead;
+    worldColumns = columnRead;
+
+    maze = new char * [worldRows];
+    for (unsigned int x = 0; x < worldRows; x++)
+    {
+      maze[x] = new char[worldColumns];
+      for (unsigned int y = 0; y < worldColumns; y++)
+      {
+          maze[x][y] = ' ';
+      }
+    }
+
+  }
 
   //allocate the maze.
 
@@ -118,22 +150,61 @@ void Dungeon::readInMaze(string fileName)
     }
   }
 
+
+
   //inputFile.close();
   //inputFile.open(fileName.c_str());
-  //char inputChar = ' ';
+  char inputChar;
+  inputFile.get(inputChar);
 
-  cout << worldRows << worldColumns << endl;
+  unsigned int x, y;
+  x = 0;
+  y = 0;
 
-  for (unsigned int x = 0; x < worldRows; x++)
+
+  while ( x < worldRows)
   {
-    for (unsigned int y = 0; y < worldColumns; y++)
+    y = 0;
+    while ( y < worldColumns)
     {
-      inputFile.get(maze[x][y]);
-      if (maze[x][y] == '\n')
-        inputFile.get(maze[x][y]);
-      cout << maze[x][y];
+      inputFile.get(inputChar);
+
+        cout << x << endl;
+        cout << y << endl;
+
+        if (inputChar == 'T' || inputChar == '*' || inputChar == ' ')
+        {
+
+          maze[x][y] = inputChar;
+          y++;
+        }
+        else
+        {
+          if (y+1 == worldColumns - 2)
+          {
+            x++;
+            y = 0;
+            
+            maze[x][y] = inputChar;
+
+          }
+          else
+          {
+            cout << "newLine!" << endl;
+            x++;
+            y = 0;
+          }
+        }
+
+        if (x >= worldRows || y > worldColumns)
+        {
+          return;
+        }
+
+        cout << maze[x][y] << endl;
+        cout << endl;
     }
-    cout << endl;
+    x++;
   }
 
 }
