@@ -1,7 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
-#include <algorithm>
 #include <fstream>
 #include "Dungeon.h"
 
@@ -27,6 +26,7 @@ Dungeon::Dungeon(unsigned int rows, unsigned int col)
       maze[x][y] = ' ';
     }
   }
+
 }
 
 Dungeon::Dungeon(string fileName)
@@ -35,6 +35,7 @@ Dungeon::Dungeon(string fileName)
   worldColumns = 0;
   maze = 0;
   readInMaze(fileName);
+
 }
 
 Dungeon::~Dungeon()
@@ -52,17 +53,17 @@ char Dungeon::getMazeSquare(unsigned int row, unsigned int col) const
   {
     if (row >= worldRows || col >= worldColumns)
     {
-      cout << endl;
       throw string("Invalid cell in dungeon. Exiting the game.");
     }
   }
   catch (string error)
   {
+      cout << endl;
       cout << error;
       exit(0);
   }
 
-  return maze[row][col];
+  return (maze[row][col]);
 }
 
 unsigned int Dungeon::getWorldRows() const
@@ -151,7 +152,6 @@ void Dungeon::readInMaze(string fileName)
   }
 
 
-
   //inputFile.close();
   //inputFile.open(fileName.c_str());
   char inputChar;
@@ -169,9 +169,6 @@ void Dungeon::readInMaze(string fileName)
     {
       inputFile.get(inputChar);
 
-        cout << x << endl;
-        cout << y << endl;
-
         if (inputChar == 'T' || inputChar == '*' || inputChar == ' ')
         {
 
@@ -184,13 +181,12 @@ void Dungeon::readInMaze(string fileName)
           {
             x++;
             y = 0;
-            
+
             maze[x][y] = inputChar;
 
           }
           else
           {
-            cout << "newLine!" << endl;
             x++;
             y = 0;
           }
@@ -200,11 +196,9 @@ void Dungeon::readInMaze(string fileName)
         {
           return;
         }
-
-        cout << maze[x][y] << endl;
-        cout << endl;
     }
     x++;
   }
+
 
 }

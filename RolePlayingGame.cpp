@@ -1,6 +1,8 @@
 #include <iostream>
+#include <string>
 #include <stdlib.h>
 #include <time.h>
+#include <sstream>
 #include <vector>
 
 #include "RandomNumberGenerator.h"
@@ -12,35 +14,35 @@ using namespace std;
 
 int confusion = 1;
 
-RolePlayingGame::RolePlayingGame(unsigned int seed, unsigned int nrMon,
-  unsigned int nrKits, unsigned int nrPotions, unsigned int boost,
-  unsigned int maxHealth)
-{
-    //initialize the dungeon to be empty
-
-    this->dungeon.readInMaze("mazeExample.txt");
-
-    initializeCreatures();
-
-
-    initializeHero(seed);
-
-
-
-    initializeMonsters(seed, nrMon);
-
-
-
-    initializePotions(seed, nrPotions);
-
-
-
-    initializeFirstAidKits(seed, nrKits, boost);
-
-
-
-    this->maxHealth = maxHealth;
-}
+// RolePlayingGame::RolePlayingGame(unsigned int seed, unsigned int nrMon,
+//   unsigned int nrKits, unsigned int nrPotions, unsigned int boost,
+//   unsigned int maxHealth)
+// {
+//     //initialize the dungeon to be empty
+//
+//     this->dungeon.readInMaze("mazeExample.txt");
+//
+//
+//
+//     initializeCreatures();
+//
+//     initializeHero(seed);
+// 
+//
+//
+//     initializeMonsters(seed, nrMon);
+//
+//
+//
+//     initializePotions(seed, nrPotions);
+//
+//
+//
+//     initializeFirstAidKits(seed, nrKits, boost);
+//
+//
+//     this->maxHealth = maxHealth;
+// }
 
 RolePlayingGame::~RolePlayingGame()
 {
@@ -52,8 +54,8 @@ RolePlayingGame::~RolePlayingGame()
 bool RolePlayingGame::moveHero(const char direction)
 {
 
-  RandomNumberGenerator ran(1, this->dungeon.getWorldRows());
-  RandomNumberGenerator ran2(1, this->dungeon.getWorldColumns());
+  RandomNumberGenerator ran(1, (this->dungeon.getWorldRows()-2)*1000);
+  RandomNumberGenerator ran2(1, (this->dungeon.getWorldColumns()-2)*1000);
 
   unsigned int row,col;
 
@@ -185,8 +187,8 @@ bool RolePlayingGame::moveHero(const char direction)
        do
        {
 
-         row = ran.nextInt();
-         col = ran2.nextInt();
+         row = (ran.nextInt())/1000;
+         col = (ran2.nextInt())/1000;
 
        } while (creatures[row][col] != 0 || dungeon.getMazeSquare(row,col) != ' ');
 
@@ -366,43 +368,44 @@ void RolePlayingGame::initializeCreatures()
 void RolePlayingGame::initializeMonsters(unsigned int seed, unsigned int numMon)
 {
   unsigned int row,col;
+  int inputNumber = (int)numMon;
 
   do
   {
-    if (numMon > 9)
+    try
     {
-      cout << "Too many monsters requested. Maximum 9 allowed" << endl;
-      cout << "Enter an integer from 0 to 9. How many monsters should be added: ";
-      cin >> numMon;
-    }
-    if (numMon < 0)
-    {
-      cout << "Enter an integer from 0 to 9. How many monsters should be added: ";
-      cin >> numMon;
-    }
-  } while (numMon < 0 || numMon > 9);
+      if (inputNumber < 1)
+        throw string("Enter an integer from 1 to 10. How many monsters should be added: ");
 
-  nrMonsters = numMon;
-  cout << "Monsters to be entered " << nrMonsters << endl;
+      if (inputNumber > 10)
+        throw string("Too many monsters requested. Maximum 10 allowed.\nHow many monsters should be added: ");
+    }
+    catch (string error)
+    {
+      cout << endl;
+      cout << error;
+      cin >> inputNumber;
+    }
+  } while (inputNumber < 1 || inputNumber > 10);
+
+  nrMonsters = (unsigned int)inputNumber;
   monsters = new Creature[nrMonsters];
 
   //Placing the monsters
-  srand(time(NULL));
-  RandomNumberGenerator ran(seed, this->dungeon.getWorldRows());
-  RandomNumberGenerator ran2(seed, this->dungeon.getWorldColumns());
+  RandomNumberGenerator ran(seed, (this->dungeon.getWorldRows()-2)*1000);
+  RandomNumberGenerator ran2(seed, (this->dungeon.getWorldColumns()-2)*1000);
 
   for (unsigned int everyMonster = 0; everyMonster < nrMonsters; everyMonster++)
   {
-
     do
     {
 
-      row = ran.nextInt();
+      row = (ran.nextInt())/1000;
 
-      col = ran2.nextInt();
+      col = (ran2.nextInt())/1000;
 
     } while ((row >= dungeon.getWorldRows() || col >= dungeon.getWorldColumns())
-     || (dungeon.getMazeSquare(row,col) != ' '));
+     || (dungeon.getMazeSquare(row,col) != ' ') || creatures[row][col] != 0);
 
     monsters[everyMonster] = Creature();
     creatures[row][col] = &monsters[everyMonster];
@@ -412,29 +415,48 @@ void RolePlayingGame::initializeMonsters(unsigned int seed, unsigned int numMon)
 void RolePlayingGame::initializeFirstAidKits(unsigned int seed,
   unsigned int numKits, unsigned int boost)
 {
+  int inputNumber = numKits;
   unsigned int x = nrMonsters/2;
+  stringstream ss;
+  ss << x;
   unsigned row,col;
   do
   {
-    if (numKits > x)
+    try
     {
-      cout << "Too many first aid kits requested.";
-      cout << " Maximum " << x << " allowed" << endl;
-      cout << "Enter an integer from 0 to ";
-      cout << x << ". How many kits should be added: ";
-      cin >> numKits;
-    }
-    if (numKits < 0)
-    {
-      cout << "Enter an integer from 0 to ";
-      cout << x << ". How many kits should be added: ";
-      cin >> numKits;
-    }
-  } while (numKits < 0 || numKits > x);
-  nrFirstAidKits =  numKits;
+      if ((unsigned int)inputNumber > x)
+      {
+          string errorString = "Too many first aid kits requested. Maximum ";
 
-  RandomNumberGenerator ran(seed, this->dungeon.getWorldRows());
-  RandomNumberGenerator ran2(seed, this->dungeon.getWorldColumns());
+          errorString.append(ss.str());
+          errorString += " allowed.";
+          errorString += "\nEnter an integer from 0 to ";
+          errorString.append(ss.str());
+          errorString += ". How many kits should be added: ";
+          throw errorString;
+      }
+
+      if (inputNumber < 0)
+      {
+        string errorString = "Enter an integer from 0 to ";
+        errorString.append(ss.str());
+        errorString += ". How many kits should be added: ";
+        throw errorString;
+      }
+
+
+    }
+    catch (string error)
+    {
+      cout << endl;
+      cout << error;
+      cin >> inputNumber;
+    }
+  } while (inputNumber < 0 || (unsigned int)inputNumber > x);
+  nrFirstAidKits =  inputNumber;
+
+  RandomNumberGenerator ran(seed, (this->dungeon.getWorldRows()-2)*1000);
+  RandomNumberGenerator ran2(seed, (this->dungeon.getWorldColumns()-2)*1000);
 
   firstAidKits = new Creature[nrFirstAidKits];
 
@@ -442,11 +464,11 @@ void RolePlayingGame::initializeFirstAidKits(unsigned int seed,
   {
     do
     {
-      row = ran.nextInt();
-      col = ran.nextInt();
+      row = (ran.nextInt())/1000;
+      col = (ran.nextInt())/1000;
 
     } while ((row >= dungeon.getWorldRows() || col >= dungeon.getWorldColumns())
-    || (dungeon.getMazeSquare(row,col) != ' '));
+    || (dungeon.getMazeSquare(row,col) != ' ') || creatures[row][col] != 0);
     firstAidKits[x] = Creature();
     firstAidKits[x].setHealth(boost);
     creatures[row][col] = &firstAidKits[x];
@@ -456,45 +478,63 @@ void RolePlayingGame::initializeFirstAidKits(unsigned int seed,
 
 void RolePlayingGame::initializePotions(unsigned int seed, unsigned int numPotions)
 {
-  srand(time(NULL));
 
-  unsigned int x = nrMonsters/2;
-  unsigned row,col;
+  int x = nrMonsters/2;
+  stringstream ss;
+  ss << x;
+  int inputNumber = numPotions;
   do
   {
-    if (numPotions > x)
+  try
+  {
+    if (inputNumber > x)
     {
-      cout << "Too many potions requested.";
-      cout << " Maximum " << x << " allowed" << endl;
-      cout << "Enter an integer from 0 to ";
-      cout << x << ". How many potions should be added: ";
-      cin >> numPotions;
+        string errorString = "Too many potions requested. Maximum ";
+
+        errorString.append(ss.str());
+        errorString += " allowed.";
+        errorString += "\nEnter an integer from 0 to ";
+        errorString.append(ss.str());
+        errorString += ". How many potions should be added: ";
+        throw errorString;
     }
-    if (numPotions < 0)
+
+    if (inputNumber < 0)
     {
-      cout << "Enter an integer from 0 to ";
-      cout << x << ". How many potions should be added: ";
-      cin >> numPotions;
+      string errorString = "Enter an integer from 0 to ";
+      errorString.append(ss.str());
+      errorString += ". How many potions should be added: ";
+      throw errorString;
     }
-  } while (numPotions < 0 || numPotions > x);
 
+  }
+  catch (string error)
+  {
+    cout << endl;
+    cout << error;
+    cin >> inputNumber;
+  }
+  } while (inputNumber < 0 || inputNumber > x);
 
-  nrPotions =  numPotions;
+  nrPotions = inputNumber;
+  nrPotions = (unsigned int)inputNumber;
 
   potions = new Creature[nrPotions];
 
-  RandomNumberGenerator ran(seed, this->dungeon.getWorldRows());
-  RandomNumberGenerator ran2(seed, this->dungeon.getWorldColumns());
+  unsigned int row,col;
+
+  RandomNumberGenerator ran(seed, (this->dungeon.getWorldRows()-2)*1000);
+  RandomNumberGenerator ran2(seed, (this->dungeon.getWorldColumns()-2)*1000);
 
   for (unsigned int x = 0; x < nrPotions; x++)
   {
     do
     {
-      row = ran.nextInt();
-      col = ran2.nextInt();
+      row = (ran.nextInt())/1000;
+      col = (ran2.nextInt())/1000;
 
     } while ((row >= dungeon.getWorldRows() || col >= dungeon.getWorldColumns())
-    || (dungeon.getMazeSquare(row,col) != ' '));
+    || (dungeon.getMazeSquare(row,col) != ' ') || creatures[row][col] != 0);
     potions[x] = Creature();
     if (x % 2)
     {
@@ -507,20 +547,19 @@ void RolePlayingGame::initializePotions(unsigned int seed, unsigned int numPotio
 
 void RolePlayingGame::initializeHero(unsigned int seed)
 {
-  cout << seed << endl;
 
   hero = Creature();
   unsigned int row,col;
-  RandomNumberGenerator ran(seed, this->dungeon.getWorldRows() -2);
-  RandomNumberGenerator ran2(seed, this->dungeon.getWorldColumns() -2);
+  RandomNumberGenerator ran(seed, (this->dungeon.getWorldRows() -2)*1000);
+  RandomNumberGenerator ran2(seed, (this->dungeon.getWorldColumns() -2)*1000);
 
   do
   {
-    row = ran.nextInt();
-    col = ran2.nextInt();
+    row = (ran.nextInt())/1000;
+    col = (ran2.nextInt())/1000;
 
   } while ((row >= dungeon.getWorldRows() || col >= dungeon.getWorldColumns())
-  || (dungeon.getMazeSquare(row,col) != ' '));
+  || (dungeon.getMazeSquare(row,col) != ' ') || creatures[row][col] != 0);
 
   creatures[row][col] = &hero;
 }
