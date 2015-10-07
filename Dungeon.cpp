@@ -95,14 +95,14 @@ void Dungeon::readInMaze(string fileName)
   {
     if (!inputFile.good())
     {
-      cout << endl;
       throw string("The file does not exist. Exiting the program.");
 
     }
   }
     catch (string error)
     {
-      cout << error;
+      cout << endl;
+      cout << error << endl;
       exit(0);
     }
 
@@ -152,10 +152,16 @@ void Dungeon::readInMaze(string fileName)
   }
 
 
-  //inputFile.close();
-  //inputFile.open(fileName.c_str());
+  inputFile.close();
+  inputFile.open(fileName.c_str());
+
   char inputChar;
   inputFile.get(inputChar);
+
+  while (inputChar != '\n' && inputChar != '\r')
+  {
+    inputFile.get(inputChar);
+  }
 
   unsigned int x, y;
   x = 0;
@@ -189,15 +195,27 @@ void Dungeon::readInMaze(string fileName)
           {
             x++;
             y = 0;
+
+            //maze[x][y] = inputChar;
           }
         }
 
-        if (x >= worldRows || y > worldColumns)
+        if (x >= worldRows || y >= worldColumns)
         {
+          // for (unsigned int i = 0; i < worldRows; i++)
+          // {
+          //     for (unsigned int j = 0; j < worldColumns; j++)
+          //   {
+          //     cout << maze[i][j];
+          //   }
+          //   cout << endl;
+          // }
+
+          if (x >= worldRows)
           return;
         }
     }
-    x++;
+    //x++;
   }
 
 

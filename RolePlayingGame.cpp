@@ -1,48 +1,47 @@
 #include <iostream>
 #include <string>
 #include <stdlib.h>
-#include <time.h>
 #include <sstream>
 #include <vector>
 
 #include "RandomNumberGenerator.h"
 #include "Dungeon.h"
 #include "RolePlayingGame.h"
-#include "Hero.h"
+
 
 using namespace std;
 
 int confusion = 1;
 
-// RolePlayingGame::RolePlayingGame(unsigned int seed, unsigned int nrMon,
-//   unsigned int nrKits, unsigned int nrPotions, unsigned int boost,
-//   unsigned int maxHealth)
-// {
-//     //initialize the dungeon to be empty
-//
-//     this->dungeon.readInMaze("mazeExample.txt");
-//
-//
-//
-//     initializeCreatures();
-//
-//     initializeHero(seed);
-// 
-//
-//
-//     initializeMonsters(seed, nrMon);
-//
-//
-//
-//     initializePotions(seed, nrPotions);
-//
-//
-//
-//     initializeFirstAidKits(seed, nrKits, boost);
-//
-//
-//     this->maxHealth = maxHealth;
-// }
+RolePlayingGame::RolePlayingGame(unsigned int seed, unsigned int nrMon,
+  unsigned int nrKits, unsigned int nrPotions, unsigned int boost,
+  unsigned int maxHealth)
+{
+    //initialize the dungeon to be empty
+
+    this->dungeon.readInMaze("mazeExample2.txt");
+
+
+
+    initializeCreatures();
+
+    initializeHero(seed);
+
+
+
+    initializeMonsters(seed, nrMon);
+
+
+
+    initializePotions(seed, nrPotions);
+
+
+
+    initializeFirstAidKits(seed, nrKits, boost);
+
+
+    this->maxHealth = maxHealth;
+}
 
 RolePlayingGame::~RolePlayingGame()
 {
@@ -369,6 +368,7 @@ void RolePlayingGame::initializeMonsters(unsigned int seed, unsigned int numMon)
 {
   unsigned int row,col;
   int inputNumber = (int)numMon;
+  string inputString;
 
   do
   {
@@ -384,7 +384,8 @@ void RolePlayingGame::initializeMonsters(unsigned int seed, unsigned int numMon)
     {
       cout << endl;
       cout << error;
-      cin >> inputNumber;
+      cin >> inputString;
+      inputNumber = atoi(inputString.c_str());
     }
   } while (inputNumber < 1 || inputNumber > 10);
 
@@ -415,6 +416,7 @@ void RolePlayingGame::initializeMonsters(unsigned int seed, unsigned int numMon)
 void RolePlayingGame::initializeFirstAidKits(unsigned int seed,
   unsigned int numKits, unsigned int boost)
 {
+  string inputString;
   int inputNumber = numKits;
   unsigned int x = nrMonsters/2;
   stringstream ss;
@@ -450,7 +452,8 @@ void RolePlayingGame::initializeFirstAidKits(unsigned int seed,
     {
       cout << endl;
       cout << error;
-      cin >> inputNumber;
+      cin >> inputString;
+      inputNumber = atoi(inputString.c_str());
     }
   } while (inputNumber < 0 || (unsigned int)inputNumber > x);
   nrFirstAidKits =  inputNumber;
@@ -478,7 +481,7 @@ void RolePlayingGame::initializeFirstAidKits(unsigned int seed,
 
 void RolePlayingGame::initializePotions(unsigned int seed, unsigned int numPotions)
 {
-
+  string inputString;
   int x = nrMonsters/2;
   stringstream ss;
   ss << x;
@@ -512,7 +515,8 @@ void RolePlayingGame::initializePotions(unsigned int seed, unsigned int numPotio
   {
     cout << endl;
     cout << error;
-    cin >> inputNumber;
+    cin >> inputString;
+    inputNumber = atoi(inputString.c_str());
   }
   } while (inputNumber < 0 || inputNumber > x);
 
